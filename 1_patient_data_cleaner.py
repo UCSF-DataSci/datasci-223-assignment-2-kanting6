@@ -123,7 +123,7 @@ def main():
     if not cleaned_patients:
         # FIX: Added check for no cleaned patients
         print("No valid patients found after cleaning.")
-        return
+        return 
 
     # Print the cleaned patient data
     print("Cleaned Patient Data:")
