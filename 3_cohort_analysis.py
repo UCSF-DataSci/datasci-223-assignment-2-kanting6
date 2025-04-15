@@ -14,7 +14,7 @@ def analyze_patient_cohorts(input_file: str) -> pl.DataFrame:
         - avg_age: Mean age by BMI range
     """
     # Create temporary parquet file
-    parquet_file = "patients_temp.parquet"
+    parquet_file = "patients_temp.parquet" 
     
     try:
         # Convert CSV to Parquet for efficient processing
