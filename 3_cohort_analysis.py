@@ -68,7 +68,7 @@ def main():
         results = analyze_patient_cohorts(input_file)
         
         # Print summary statistics
-        print("\nCohort Analysis Summary:")
+        print("Cohort Analysis Results:")
         print(results)
         
     except Exception as e:
