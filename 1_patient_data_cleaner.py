@@ -51,9 +51,17 @@ def load_patient_data(filepath):
     Returns:
         list: List of patient dictionaries
     """
-    # BUG: No error handling for file not found
-    with open(filepath, 'r') as file:
-        return json.load(file)
+    try:
+        with open(filepath, 'r') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        # FIX: Added error handling for file not found
+        print(f"Error: File not found at {filepath}")
+        return []
+    except json.JSONDecodeError:
+        # FIX: Added error handling for JSON parsing errors
+        print("Error: Failed to parse JSON file.")
+        return []
 
 def clean_patient_data(patients):
     """
@@ -70,26 +78,28 @@ def clean_patient_data(patients):
         list: Cleaned list of patient dictionaries
     """
     cleaned_patients = []
-    
+    seen_records = set()
+
     for patient in patients:
-        # BUG: Typo in key 'nage' instead of 'name'
-        patient['nage'] = patient['name'].title()
-        
-        # BUG: Wrong method name (fill_na vs fillna)
-        patient['age'] = patient['age'].fill_na(0)
-        
-        # BUG: Wrong method name (drop_duplcates vs drop_duplicates)
-        patient = patient.drop_duplcates()
-        
-        # BUG: Wrong comparison operator (= vs ==)
-        if patient['age'] = 18:
-            # BUG: Logic error - keeps patients under 18 instead of filtering them out
+        # FIX: Corrected key 'nage' to 'name'
+        patient['name'] = patient['name'].title()
+
+        try:
+            # FIX: Convert age to integer and handle invalid values
+            patient['age'] = int(patient['age'])
+        except (ValueError, TypeError):
+            patient['age'] = 0
+
+        # FIX: Corrected logic to filter patients under 18
+        if patient['age'] < 18:
+            continue
+
+        # FIX: Avoid duplicate entries by using a set to track records
+        record_tuple = (patient['name'], patient['age'], patient['gender'], patient['diagnosis'])
+        if record_tuple not in seen_records:
+            seen_records.add(record_tuple)
             cleaned_patients.append(patient)
-    
-    # BUG: Missing return statement for empty list
-    if not cleaned_patients:
-        return None
-    
+
     return cleaned_patients
 
 def main():
@@ -100,20 +110,26 @@ def main():
     # Construct the path to the data file
     data_path = os.path.join(script_dir, 'data', 'raw', 'patients.json')
     
-    # BUG: No error handling for load_patient_data failure
     patients = load_patient_data(data_path)
-    
+
+    if not patients:
+        # FIX: Added check for empty or invalid patient data
+        print("No patient data to process.")
+        return
+
     # Clean the patient data
     cleaned_patients = clean_patient_data(patients)
-    
-    # BUG: No check if cleaned_patients is None
+
+    if not cleaned_patients:
+        # FIX: Added check for no cleaned patients
+        print("No valid patients found after cleaning.")
+        return 
+
     # Print the cleaned patient data
     print("Cleaned Patient Data:")
     for patient in cleaned_patients:
-        # BUG: Using 'name' key but we changed it to 'nage'
-        print(f"Name: {patient['name']}, Age: {patient['age']}, Diagnosis: {patient['diagnosis']}")
-    
-    # Return the cleaned data (useful for testing)
+        print(f"Name: {patient['name']}, Age: {patient['age']}, Gender: {patient['gender']}, Diagnosis: {patient['diagnosis']}")
+
     return cleaned_patients
 
 if __name__ == "__main__":
